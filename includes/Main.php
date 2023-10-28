@@ -604,7 +604,7 @@ public static function actCreate($arr = array()){
     $where = explode(';', $arr['action_do']);
 
     foreach($actions as $key => $a){
-      $act[] = array("act"=>$a, "do"=> $where[$key] >=1 ? self::convertLevelLink($where[$key]) : $where[$key]);
+      $act[] = array("act"=>$a, "do"=> (int)$where[$key] >=1 ? self::convertLevelLink($where[$key]) : $where[$key]);
       file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', " -- i am inside foreach loop with value ---- ".$a."---- §where--".$where[$key]."\n", FILE_APPEND);
     }
     file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', " -- i am returnning false before end  ---- "."\n", FILE_APPEND);

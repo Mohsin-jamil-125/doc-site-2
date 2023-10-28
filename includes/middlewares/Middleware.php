@@ -49,6 +49,7 @@ class Middleware{
       try {
         $pdo->beginTransaction();
         $frm = []; 
+        $frm["crt"] = $this->db->getLastInsertId('allusers') + 1;
         $frm["leveltype"] = $this->config['accessLevel']['register'];
         $frm["usernames"] = $generate_username;
         $frm["userfstname"] = $allProfile['firstName'];
@@ -74,7 +75,7 @@ class Middleware{
         file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', "unique_key - ".$frm["unique_key"]."\n", FILE_APPEND);
         file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', "uip - ".$frm["uip"]."\n", FILE_APPEND);
         
-        
+
 
         $insertUser = $this->db->insert("allusers", $frm);
        /* $prefferencesUsers = $this->config['uspreffs'];

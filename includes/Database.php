@@ -352,6 +352,20 @@ class Database{
         }
     }
 
+    public function getLastInsertId($table, $idField='crt'){
+        $sql = "SELECT $idField  FROM `$table` ORDER BY `crt` DESC LIMIT 1";
+
+        $query = $this->db->prepare($sql);
+        $query->execute();
+
+        $id = 0;
+        if($query->rowCount() > 0){
+            $data = $query->fetchAll(PDO::FETCH_ASSOC);
+            $id = $data[0][$idField];
+        }
+        return (int)$id;
+    }
+
 
     /*
      * Replace data into the database
