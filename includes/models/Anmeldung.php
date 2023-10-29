@@ -257,6 +257,72 @@ class Anmeldung extends Model  {
     }
   }
 
+  public function doSimpleLogin($params = false){
+      if($params){
+      if(!$frm = Main::forms($params)){
+				return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Zugriff verweigert'))));
+			}
+
+      try{
+          $this->email = $params['mail']; // $ansprecheralias, $frmalias,
+
+        $email_exists = $this->emailExists();
+        if($this->userbanned == 1){
+          return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e("Konto ist geschlossen"))));
+        }
+
+        if($this->userverified == 0 || $this->activated == 0){
+         return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Konto nicht aktiviert'))));
+        }
+
+        // check account activate
+        if($ansprecher = $this->isHeAnsprechpartner($this->ansprechId)){ /// crt, usid, activated
+          if(!$ansprecher['activated'] == 1) { return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Konto nicht aktiviert')))); }
+        }
+
+        if($email_exists && $checks = $this->passwordOk($this->id, $this->password, $frm['password'], $this->salz)){
+          if($checks['result'] >= 2){
+            return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>$checks['msg'])));
+          }
+
+          if($this->userverified == 2 || $this->activated == 2){
+            $decoy = Main::randomString( 5 );
+            Main::cookie("precovers", $decoy.$this->unique_key, 120);
+            return array("user_error"=>1, "user_reason"=>3, "sweets"=>e("Richten Sie Ihr neues Passwort ein!"), "msg"=>Main::actCreate(array("action"=>"error;redirect", "action_do"=>"Passwort erstellen!;/neupasswort")));
+          }
+
+          if($this->ansprecheralias && $this->frmalias){
+            $jsonArr = base64_encode(json_encode(array("loggedin"=>TRUE, "key"=>$this->auth_key.$this->id, "uniq"=>$this->unique_key, "membership"=>$this->membership, "leveltype"=>$this->loggedLevel, "ansprecheralias"=>$this->ansprecheralias, "frmalias"=>$this->frmalias )));
+          }else{
+            $jsonArr = base64_encode(json_encode(array("loggedin"=>TRUE, "key"=>$this->auth_key.$this->id, "uniq"=>$this->unique_key, "membership"=>$this->membership, "leveltype"=>$this->loggedLevel)));
+          }
+
+
+          $token = Tools::setJwt(array("id"=>$jsonArr));
+          $jwt = $this->unique_key.JWT::encode($token, JWTKEY);
+
+          $user_browser = $_SERVER['HTTP_USER_AGENT'];
+          $sessData['login_string'] = hash('sha512', $frm['password'] . $user_browser);
+          $_SESSION['sessData'] = $sessData;
+
+          $_SESSION["login"] = $jsonArr;
+				//	$_SESSION["logi"] = $this->unique_key;
+				//	$_SESSION['loogiwh'] = $this->loggedLevel;
+					$this->logged=TRUE;
+          Main::cookie("loowt", $jwt);
+
+          return array("user_error"=>1, "user_reason"=>1, "msg"=>Main::actCreate(array("action"=>"success;redirect", "action_do"=>e('Login erfolgreich').";".$this->loggedLevel)));
+        }else{
+          return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Login fehlgeschlagen'))));
+        }
+      }catch (Exception $e){
+        return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Zugriff verweigert'))), "error"=>$e->getMessage());
+      }
+    }else{
+      return array("user_error"=>1, "user_reason"=>2, "msg"=>e('Fehler, versuche es erneut!'));
+    }
+  }
+
 
 /**
 * Check if Email exits | LOGIN HERE
