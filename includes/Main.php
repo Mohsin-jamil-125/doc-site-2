@@ -1844,6 +1844,7 @@ public static function doBirthdate($showBirth, $userday, $usermonth, $useryear){
     $emailSubject = array(
       'email'=> array_key_exists('customsubject', $array) ? $array['customsubject'] : Main::config('title'),
       'register'=>e('Herzlich willkommen bei doc-site!'),
+      'registerInform'=>e('Neuer Benutzer!'),
       'registerConfirm'=>e('E-Mail ist bestätigt!'),
       'confirm'=>e('Account Bestätigung'),
       'recovery'=>e('Passwort zurücksetzen'),
@@ -1934,6 +1935,13 @@ public static function doBirthdate($showBirth, $userday, $usermonth, $useryear){
         $lines['l4']=e('Der Bestätigungsmail läuft in 48 Stunden ab.');
         $lines['l5']=e('Haben Sie diese Email erhalten, ohne dass Sie sich registriert haben? Dann klicken Sie bitte hier.');
        break;
+      case "registerInform":
+        $template = 1;
+        $lines['l0'] = e('Neuer Benutzer');
+        $lines['l1']=e('');
+        $lines['b1']=e('Email Adresse');
+        $lines['b1link'] = $array['user_email'];
+       break;
        case "registerBewerb":
         $template = 1;
         $lines['l0'] = e('Herzlich willkommen bei doc-site!');
@@ -1954,7 +1962,12 @@ public static function doBirthdate($showBirth, $userday, $usermonth, $useryear){
     }
 
 
-    return array("subject"=>$emailSubject[$subject] ? $emailSubject[$subject] : Main::$config['title'], "statics"=>$emailStatics, "lines"=>$lines, "template"=>$template);
+    return array(
+        "subject"=>$emailSubject[$subject] ? $emailSubject[$subject] : Main::$config['title'],
+        "statics"=>$emailStatics,
+        "lines"=>$lines,
+        "template"=>$template
+    );
   }
 
 /**

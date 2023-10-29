@@ -84,19 +84,16 @@ class Registrieren extends Model  {
           return $r;
         }
 
-        if(Main::websettings("registermail") == 1){  
+        if(Main::websettings("registermail") == 1){
           $emailDo = Main::emailCreate('register', array('b1link'=>'https://doc-site.de/pruf/prufMail/'.$r['uniq'], 'b2link'=>'')); // 'b2link'=>'https://doc-site.de/pruf/newMail/'.$r['uniq']
-
-        
-
           file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', "usermail- ". $frm['usermail']."\n", FILE_APPEND);
           file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', "subject - ".$frm['subject']."\n", FILE_APPEND);
           file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', "message - ".$frm['message']."\n", FILE_APPEND);
-   
-
-
-
           @$this->sendmail($frm['usermail'], $emailDo['subject'], $emailDo['message'],  $emailDo['template']);
+
+          // send email to admin
+            $emailDo = Main::emailCreate('registerInform', array('user_email'=>'dsaldk@asd.com'));
+            @$this->sendmail($this->config['email'], $emailDo['subject'], $emailDo['message'],  $emailDo['template']);
         }
         file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', " ------- Success in Registration.php -----  level value = ".$r['level']."\n", FILE_APPEND);
         return array("user_error"=>1, "user_reason"=>1, "msg"=>Main::actCreate(array("action"=>"success;redirect", "action_do"=>e('Registrierung erfolgreich!').";".$r['level'])));
