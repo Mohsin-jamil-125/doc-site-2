@@ -257,8 +257,12 @@ class Anmeldung extends Model  {
     }
   }
 
-  public function setLoginSession($params = false){
+  public function doSimpleLogin($params = false){
       if($params){
+      if(!$frm = Main::forms($params)){
+				return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Zugriff verweigert'))));
+			}
+
       try{
           $this->email = $params['mail']; // $ansprecheralias, $frmalias,
 
@@ -271,7 +275,12 @@ class Anmeldung extends Model  {
          return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Konto nicht aktiviert'))));
         }
 
-        if($email_exists && $checks = $this->passwordOk($this->id, $this->password, $params['password'], $this->salz)){
+        // check account activate
+        if($ansprecher = $this->isHeAnsprechpartner($this->ansprechId)){ /// crt, usid, activated
+          if(!$ansprecher['activated'] == 1) { return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Konto nicht aktiviert')))); }
+        }
+
+        if($email_exists && $checks = $this->passwordOk($this->id, $this->password, $frm['password'], $this->salz)){
           if($checks['result'] >= 2){
             return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>$checks['msg'])));
           }
@@ -293,7 +302,7 @@ class Anmeldung extends Model  {
           $jwt = $this->unique_key.JWT::encode($token, JWTKEY);
 
           $user_browser = $_SERVER['HTTP_USER_AGENT'];
-          $sessData['login_string'] = hash('sha512', $params['password'] . $user_browser);
+          $sessData['login_string'] = hash('sha512', $frm['password'] . $user_browser);
           $_SESSION['sessData'] = $sessData;
 
           $_SESSION["login"] = $jsonArr;
@@ -302,15 +311,14 @@ class Anmeldung extends Model  {
 					$this->logged=TRUE;
           Main::cookie("loowt", $jwt);
 
-          return true;
+          return array("user_error"=>1, "user_reason"=>1, "msg"=>Main::actCreate(array("action"=>"success;redirect", "action_do"=>e('Login erfolgreich').";".$this->loggedLevel)));
         }else{
-          return false;
+          return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Login fehlgeschlagen'))));
         }
       }catch (Exception $e){
         return array("user_error"=>1, "user_reason"=>2, "msg"=>Main::actCreate(array("action"=>"error", "action_do"=>e('Zugriff verweigert'))), "error"=>$e->getMessage());
       }
     }else{
-          echo '';
       return array("user_error"=>1, "user_reason"=>2, "msg"=>e('Fehler, versuche es erneut!'));
     }
   }

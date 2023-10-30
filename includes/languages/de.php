@@ -1354,6 +1354,5 @@ das erste Mal bei doc-site eine Anzeige aufgeben.',
   'Erforg!' => 'Erforg!',
   'Admin-Konto' => 'Admin-Konto',
   'Bitte richtig antworten!' => 'Bitte richtig antworten!',
-  '' => '',
 );
 ?>

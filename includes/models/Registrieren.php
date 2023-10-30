@@ -9,18 +9,16 @@ use App\includes\library\phpjwt\JWT;
 use App\includes\library\phpjwt\JWK;
 
 use Hybridauth\Hybridauth;
-use App\includes\models\Anmeldung;
 
 class Registrieren extends Model  {
 
-  protected $config = [], $db, $socialsregister, $socialsloginAllowed, $email, $anmeldung;
+  protected $config = [], $db, $socialsregister, $socialsloginAllowed, $email;
   public $text = [];
   protected $socialsConfig = FALSE;
 
   public function __construct($config = NULL, $db = NULL){
     $this->config = $config;
     $this->db = $db;
-    $this->anmeldung = new Anmeldung($config, $db);
 
     $this->accessLevel = $this->config['accessLevel']['open'];
 
@@ -97,14 +95,6 @@ class Registrieren extends Model  {
             $emailDo = Main::emailCreate('registerInform', array('user_email'=>'dsaldk@asd.com'));
             @$this->sendmail($this->config['email'], $emailDo['subject'], $emailDo['message'],  $emailDo['template']);
         }
-
-          // after registration complete. set user session as login
-        $parm = [
-            'mail' => $frm['usermail'],
-            'password' => $frm['password']
-        ];
-        $this->anmeldung->setLoginSession($parm);
-        
         file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', " ------- Success in Registration.php -----  level value = ".$r['level']."\n", FILE_APPEND);
         return array("user_error"=>1, "user_reason"=>1, "msg"=>Main::actCreate(array("action"=>"success;redirect", "action_do"=>e('Registrierung erfolgreich!').";".$r['level'])));
       }catch (Exception $e){
