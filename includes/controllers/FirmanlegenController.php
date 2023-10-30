@@ -18,7 +18,7 @@ class FirmanlegenController extends Controller {
 
 
     public function index($params = ''){
-        $this->model->checkIsLogged();
+//        $this->model->checkIsLogged();
         $this->isPage = 'firma/firmanlegen';
         $params = func_get_args();
         $this->model->text['params'] = $params;
