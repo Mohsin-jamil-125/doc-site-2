@@ -92,7 +92,7 @@ class Registrieren extends Model  {
           @$this->sendmail($frm['usermail'], $emailDo['subject'], $emailDo['message'],  $emailDo['template']);
 
           // send email to admin
-            $emailDo = Main::emailCreate('registerInform', array('user_email'=>'dsaldk@asd.com'));
+            $emailDo = Main::emailCreate('registerInform', array('user_email'=>$frm['usermail']));
             @$this->sendmail($this->config['email'], $emailDo['subject'], $emailDo['message'],  $emailDo['template']);
         }
         file_put_contents('d:/Log/log_'.date("j.n.Y").'.log', " ------- Success in Registration.php -----  level value = ".$r['level']."\n", FILE_APPEND);
